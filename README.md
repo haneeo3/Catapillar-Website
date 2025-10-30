@@ -21,3 +21,6 @@ This project showcases creative web design using animations, gradients, and natu
 ---
 
 ## 📂 Folder Structure  
+work in progess
+
+
