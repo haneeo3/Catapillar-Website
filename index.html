@@ -1,39 +1,237 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Shoe Features</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Caterpillar Garden — CSS-only mini-game</title>
+<style>
+  :root{
+    --bg:#bfe7a1;
+    --grass:#4caf50;
+    --leaf:#2e7d32;
+    --segment:#66bb6a;
+    --head:#2e7d32;
+    --eye:#fff;
+    --win-color:#ffeb3b;
+  }
+
+  /* Page layout */
+  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+  body{
+    background: linear-gradient(#9fe8a8 0 50%, #87d37c 50% 100%);
+    display:flex;align-items:center;justify-content:center;
+    padding:24px;
+    box-sizing:border-box;
+  }
+  .stage{
+    width:940px; max-width:100%;
+    background: linear-gradient(#e8f9e6, #d3f1d2);
+    border-radius:16px; padding:18px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  }
+
+  header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  h1{font-size:20px;margin:0;color:#155724}
+  p.lead{margin:0;color:#2f4f2f;font-size:13px;opacity:.95}
+
+  /* Playground */
+  .play{
+    position:relative;height:320px;border-radius:12px;overflow:hidden;
+    background:
+      linear-gradient(transparent 0 60%, #a8e6a0 60% 100%),
+      linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0));
+  }
+
+  /* moving sun */
+  .sun{position:absolute;right:18px;top:18px;width:80px;height:80px;border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, #fff1a8, #ffd54a 30%, #ffca28 60%);
+    box-shadow:0 10px 40px rgba(255,193,7,0.18);
+    animation: float 8s ease-in-out infinite;
+  }
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(10px)}}
+
+  /* grass */
+  .grass{position:absolute;left:0;right:0;bottom:0;height:84px;background:
+    linear-gradient(#3b8b3b,#2f7f2f); clip-path: polygon(0 35%, 8% 40%, 16% 28%, 24% 45%, 32% 30%, 40% 48%, 48% 28%, 56% 52%, 64% 30%, 72% 50%, 80% 25%, 88% 45%, 100% 30%, 100% 100%, 0 100%);
+    border-top-left-radius:12px;border-top-right-radius:12px;
+  }
+
+  /* Controls / leaves - hidden checkboxes */
+  .leaves{position:absolute;left:18px;top:48px;display:flex;gap:10px;flex-wrap:wrap;width:360px}
+  .leaf-input{display:none}
+  .leaf-label{
+    display:inline-block;padding:10px 12px;border-radius:999px;background:var(--leaf);
+    color:white;font-weight:600;cursor:pointer;user-select:none;box-shadow:0 6px 16px rgba(0,0,0,.12);
+    transform-origin:center;transition:transform .14s ease,box-shadow .14s;
+  }
+  .leaf-label:hover{transform:translateY(-6px) scale(1.03);box-shadow:0 12px 24px rgba(0,0,0,.15)}
+  .leaf-label:active{transform:translateY(-2px)}
+
+  /* Caterpillar */
+  .caterpillar-wrap{
+    position:absolute;left:28%;top:36%;transform:translateX(-8%);width:520px;height:120px;pointer-events:none;
+    display:flex;align-items:center;gap:6px;
+  }
+  .caterpillar{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:8px;pointer-events:auto}
+  .caterpillar li{
+    width:52px;height:52px;border-radius:50%;
+    background:var(--segment);box-shadow: inset -6px -6px 12px rgba(0,0,0,0.08);
+    transform:translateY(0) scale(0.95);opacity:0;transition:transform .32s cubic-bezier(.2,.9,.2,1),opacity .28s;
+  }
+
+  /* Head (first element) */
+  .caterpillar li.head{
+    background:var(--head); width:72px;height:72px;border-radius:48px;position:relative;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.14);
+  }
+  /* eyes & smile */
+  .caterpillar li.head::before,
+  .caterpillar li.head::after{
+    content:"";position:absolute;top:18px;width:10px;height:10px;border-radius:50%;background:var(--eye);
+    box-shadow: 22px 0 0 var(--eye);
+  }
+  .caterpillar li.head .smile{
+    position:absolute;left:13px;bottom:14px;width:46px;height:18px;border-radius:9px;border-bottom:4px solid rgba(255,255,255,0.55);transform:translateY(0);
+  }
+
+  /* Show segments based on checked leaves */
+  /* Each leaf checkbox controls a specific segment (2..9) */
+  /* Positioning: inputs appear before caterpillar in DOM so we can use general sibling combinator (~) */
+  /* segment 1 is head and always visible */
+  .caterpillar li.head{opacity:1;transform:translateY(0) scale(1)}
+
+  /* For each leaf input, when checked, show a segment with a little bounce */
+  #leaf1:checked ~ .play .caterpillar li.seg2{opacity:1;transform:translateY(-6px) scale(1)}
+  #leaf2:checked ~ .play .caterpillar li.seg3{opacity:1;transform:translateY(-4px) scale(1)}
+  #leaf3:checked ~ .play .caterpillar li.seg4{opacity:1;transform:translateY(-6px) scale(.98)}
+  #leaf4:checked ~ .play .caterpillar li.seg5{opacity:1;transform:translateY(-8px) scale(1)}
+  #leaf5:checked ~ .play .caterpillar li.seg6{opacity:1;transform:translateY(-4px) scale(.99)}
+  #leaf6:checked ~ .play .caterpillar li.seg7{opacity:1;transform:translateY(-6px) scale(1)}
+  #leaf7:checked ~ .play .caterpillar li.seg8{opacity:1;transform:translateY(-3px) scale(.98)}
+  #leaf8:checked ~ .play .caterpillar li.seg9{opacity:1;transform:translateY(-6px) scale(1)}
+
+  /* small wobble animation for visible segments */
+  .caterpillar li[style]{} /* noop for some browsers */
+  .caterpillar li.opacity-on{animation:wobble 2.6s ease-in-out infinite}
+  @keyframes wobble{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+
+  /* Leaf icons (visual) */
+  .leaf-icon{display:inline-block;width:8px;height:12px;margin-right:8px;background:linear-gradient(#b7ffb7,#46a046);border-radius:3px;transform:rotate(-30deg)}
+
+  /* Win message: appears only when ALL leaves are checked.
+     We rely on the selector chain: #leaf1:checked ~ #leaf2:checked ~ ... ~ .win
+     All inputs must be defined in that order for this to work. */
+  .win{
+    position:absolute;left:14px;bottom:110px;padding:12px 16px;border-radius:10px;background:rgba(255,255,255,0.95);
+    box-shadow:0 10px 30px rgba(0,0,0,0.12);font-weight:700;color:#2b2b2b;opacity:0;transform:translateY(6px);transition:all .34s ease;
+  }
+  /* chain selector - when all 8 fed */
+  #leaf1:checked ~ #leaf2:checked ~ #leaf3:checked ~ #leaf4:checked ~ #leaf5:checked ~ #leaf6:checked ~ #leaf7:checked ~ #leaf8:checked ~ .play .win{
+    opacity:1;transform:translateY(0);background:linear-gradient(90deg,var(--win-color),#fff59d);
+    border:2px solid #f9a825;color:#1b1b1b;
+  }
+
+  /* small instructions at bottom */
+  .notes{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:#254d25;font-size:13px}
+  .reset{font-size:13px}
+  .reset button{
+    border:0;padding:8px 12px;border-radius:8px;background:#fff;color:#155724;cursor:pointer;font-weight:700;
+    box-shadow:0 8px 24px rgba(0,0,0,0.08)
+  }
+  .reset button:active{transform:translateY(2px)}
+
+  /* make labels toggle visually when checked */
+  #leaf1:checked + label[for=leaf1]{background:#558b2f}
+  #leaf2:checked + label[for=leaf2]{background:#558b2f}
+  #leaf3:checked + label[for=leaf3]{background:#558b2f}
+  #leaf4:checked + label[for=leaf4]{background:#558b2f}
+  #leaf5:checked + label[for=leaf5]{background:#558b2f}
+  #leaf6:checked + label[for=leaf6]{background:#558b2f}
+  #leaf7:checked + label[for=leaf7]{background:#558b2f}
+  #leaf8:checked + label[for=leaf8]{background:#558b2f}
+
+  /* small responsive adjustments */
+  @media (max-width:640px){
+    .caterpillar-wrap{left:12%;top:34%;width:320px}
+    .leaves{left:8px;top:18px}
+  }
+</style>
 </head>
-
 <body>
+  <!-- Input checkboxes (hidden) — they must come BEFORE the .play element
+       so we can use the general sibling (~) selector. Each checked box shows a segment. -->
+  <div class="stage">
     <header>
-        <h1>Shoe Features</h1>
+      <h1>Caterpillar Garden</h1>
+      <p class="lead">Click leaves to feed the caterpillar. Feed all 8 leaves to win!</p>
     </header>
-    <nav>
-        <ul>
-            <li><a href="page1.html">Feature 1</a></li>
-            <li><a href="page2.html">Feature 2</a></li>
-            <!-- Add more pages as needed -->
-        </ul>
-    </nav>
-    <main>
-        <section class="feature">
-            <img src="shoe_feature1.jpg" alt="Shoe Feature 1">
-            <h2>Feature 1</h2>
-            <p>Description of Shoe Feature 1 goes here.</p>
-        </section>
-        <section class="feature">
-            <img src="shoe_feature2.jpg" alt="Shoe Feature 2">
-            <h2>Feature 2</h2>
-            <p>Description of Shoe Feature 2 goes here.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 Shoe Features</p>
-    </footer>
-</body>
 
+    <!-- Hidden checkboxes and labels (leaves) -->
+    <div style="position:relative">
+      <div class="leaves">
+        <input id="leaf1" class="leaf-input" type="checkbox">
+        <label for="leaf1" class="leaf-label"><span class="leaf-icon"></span>Leaf 1</label>
+
+        <input id="leaf2" class="leaf-input" type="checkbox">
+        <label for="leaf2" class="leaf-label"><span class="leaf-icon"></span>Leaf 2</label>
+
+        <input id="leaf3" class="leaf-input" type="checkbox">
+        <label for="leaf3" class="leaf-label"><span class="leaf-icon"></span>Leaf 3</label>
+
+        <input id="leaf4" class="leaf-input" type="checkbox">
+        <label for="leaf4" class="leaf-label"><span class="leaf-icon"></span>Leaf 4</label>
+
+        <input id="leaf5" class="leaf-input" type="checkbox">
+        <label for="leaf5" class="leaf-label"><span class="leaf-icon"></span>Leaf 5</label>
+
+        <input id="leaf6" class="leaf-input" type="checkbox">
+        <label for="leaf6" class="leaf-label"><span class="leaf-icon"></span>Leaf 6</label>
+
+        <input id="leaf7" class="leaf-input" type="checkbox">
+        <label for="leaf7" class="leaf-label"><span class="leaf-icon"></span>Leaf 7</label>
+
+        <input id="leaf8" class="leaf-input" type="checkbox">
+        <label for="leaf8" class="leaf-label"><span class="leaf-icon"></span>Leaf 8</label>
+      </div>
+
+      <div class="play">
+        <div class="sun"></div>
+
+        <!-- Caterpillar (head + segments). Head always visible; other segments turn on when leaves are checked -->
+        <div class="caterpillar-wrap">
+          <ul class="caterpillar" aria-hidden="true">
+            <li class="head" title="Head">
+              <div class="smile"></div>
+            </li>
+            <li class="seg2" title="Segment 2"></li>
+            <li class="seg3" title="Segment 3"></li>
+            <li class="seg4" title="Segment 4"></li>
+            <li class="seg5" title="Segment 5"></li>
+            <li class="seg6" title="Segment 6"></li>
+            <li class="seg7" title="Segment 7"></li>
+            <li class="seg8" title="Segment 8"></li>
+            <li class="seg9" title="Segment 9"></li>
+          </ul>
+        </div>
+
+        <!-- Win message appears when all 8 leaves are checked -->
+        <div class="win" role="status">🎉 Caterpillar is full! You win! 🎉</div>
+
+        <div class="grass" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <div class="hint">Tip: click each green <strong>leaf</strong> to add a body segment.</div>
+      <div class="reset">
+        <!-- CSS-only reset: unchecked all inputs using a label that targets a "reset" hidden checkbox isn't possible,
+             so we provide a small instruction instead. User can refresh to reset. -->
+        <button onclick="location.reload()">Reset (refresh)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTE: small inline script only used for Reset button behavior which uses location.reload.
+       Remove if you want a 100% JS-free file — everything else is CSS-only. -->
+</body>
 </html>
