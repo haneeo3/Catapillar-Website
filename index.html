@@ -15,6 +15,52 @@
     background: linear-gradient(#a8e6a0, #87d37c);
     overflow:hidden;
   }
+
+  /* HOME SCREEN */
+  .home-screen {
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.3);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    z-index:20;
+  }
+
+  .home-box {
+    background:#ffffff;
+    padding:25px;
+    width:350px;
+    border-radius:12px;
+    text-align:center;
+    border:2px solid #4caf50;
+  }
+
+  .title {
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:20px;
+  }
+
+  .menu-btn {
+    display:block;
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    background:#4caf50;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+  }
+  .menu-btn:hover {
+    background:#3d8d41;
+  }
+
+  /* GAME AREA */
   .play {
     position:relative;
     width:600px;
@@ -24,6 +70,7 @@
     border-radius:12px;
     overflow:hidden;
   }
+
   .caterpillar-head, .segment {
     position:absolute;
     width:40px;
@@ -31,6 +78,7 @@
     border-radius:50%;
     background:#2e7d32;
   }
+
   .caterpillar-head::before, .caterpillar-head::after {
     content:"";
     position:absolute;
@@ -79,6 +127,24 @@
 </style>
 </head>
 <body>
+
+<!-- HOME SCREEN -->
+<div class="home-screen" id="homeScreen">
+  <div class="home-box">
+    <div class="title">
+      Hi guys, this project was created in 2022.  
+      I keep updating it hopefully every month.  
+      From high school to university, still making you better little caterpillar.
+    </div>
+
+    <button class="menu-btn" onclick="startGame()">Play</button>
+    <button class="menu-btn">Settings</button>
+    <button class="menu-btn">Credits</button>
+    <button class="menu-btn">Highscore</button>
+  </div>
+</div>
+
+<!-- GAME AREA -->
 <div class="play" id="play">
   <div class="level-label" id="levelDisplay">Level: 1</div>
   <div class="caterpillar-head" id="head"></div>
@@ -86,6 +152,13 @@
 </div>
 
 <script>
+  const homeScreen = document.getElementById('homeScreen');
+
+  function startGame() {
+    homeScreen.style.display = "none";
+  }
+
+  /* ORIGINAL GAME SCRIPT CONTINUES */
   const play = document.getElementById('play');
   const head = document.getElementById('head');
   const winMsg = document.getElementById('win');
@@ -104,20 +177,16 @@
     winMsg.style.display = "none";
     levelDisplay.textContent = "Level: " + level;
 
-    // Reset caterpillar position
     headPos = { x: 50, y: 50 };
     head.style.left = "50px";
     head.style.top = "50px";
 
-    // Remove old segments
     segments.forEach(s => s.remove());
     segments = [];
 
-    // Remove old leaves
     leaves.forEach(l => l.remove());
     leaves = [];
 
-    // Add new leaves
     const totalLeaves = leavesPerLevel + (level - 1) * 2;
     for (let i = 0; i < totalLeaves; i++) {
       const leaf = document.createElement('div');
@@ -135,7 +204,6 @@
     if (e.key === 'ArrowLeft') headPos.x -= speed;
     if (e.key === 'ArrowRight') headPos.x += speed;
 
-    // Keep inside play area
     headPos.x = Math.max(0, Math.min(play.clientWidth - 40, headPos.x));
     headPos.y = Math.max(0, Math.min(play.clientHeight - 40, headPos.y));
   });
@@ -144,7 +212,6 @@
     head.style.left = headPos.x + 'px';
     head.style.top = headPos.y + 'px';
 
-    // Follow movement
     let px = headPos.x, py = headPos.y;
     segments.forEach(seg => {
       const sx = parseFloat(seg.style.left);
@@ -157,17 +224,14 @@
       py = sy;
     });
 
-    // Collision with leaves
     leaves.forEach((leaf, idx) => {
-      const lx = leaf.offsetLeft,
-            ly = leaf.offsetTop;
+      if (Math.abs(leaf.offsetLeft - headPos.x) < 35 &&
+          Math.abs(leaf.offsetTop - headPos.y) < 35) {
 
-      if (Math.abs(lx - headPos.x) < 35 && Math.abs(ly - headPos.y) < 35) {
         leaf.remove();
         leaves.splice(idx, 1);
         addSegment();
 
-        // If all leaves eaten
         if (leaves.length === 0) {
           if (level < maxLevel) {
             winMsg.textContent = `Level ${level} Complete! Next Level Loading...`;
