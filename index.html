@@ -40,9 +40,8 @@
     border-radius:50%;
     background:#fff;
   }
-  .caterpillar-head::after {
-    left:20px;
-  }
+  .caterpillar-head::after { left:20px; }
+
   .leaf {
     position:absolute;
     width:30px;
@@ -50,6 +49,7 @@
     border-radius:50%;
     background:#66bb6a;
   }
+
   .win {
     position:absolute;
     top:50%;
@@ -63,91 +63,138 @@
     font-size:18px;
     display:none;
     z-index:10;
+    text-align:center;
+  }
+
+  .level-label {
+    position:absolute;
+    top:10px;
+    left:10px;
+    font-size:18px;
+    background:#fff;
+    padding:6px 10px;
+    border-radius:6px;
+    border:1px solid #4caf50;
   }
 </style>
 </head>
 <body>
 <div class="play" id="play">
+  <div class="level-label" id="levelDisplay">Level: 1</div>
   <div class="caterpillar-head" id="head"></div>
-  <div class="win" id="win">🎉 Caterpillar is full! You win! 🎉</div>
+  <div class="win" id="win"></div>
 </div>
+
 <script>
   const play = document.getElementById('play');
   const head = document.getElementById('head');
   const winMsg = document.getElementById('win');
+  const levelDisplay = document.getElementById('levelDisplay');
 
   let headPos = { x: 50, y: 50 };
   const speed = 10;
   let segments = [];
-
-  // Add 8 leaves at random positions
-  const totalLeaves = 8;
   let leaves = [];
-  for(let i=0;i<totalLeaves;i++){
-    const leaf = document.createElement('div');
-    leaf.className = 'leaf';
-    leaf.style.left = Math.random()*(play.clientWidth-30)+'px';
-    leaf.style.top = Math.random()*(play.clientHeight-30)+'px';
-    play.appendChild(leaf);
-    leaves.push(leaf);
+
+  let level = 1;
+  let maxLevel = 5;
+  let leavesPerLevel = 5;
+
+  function startLevel() {
+    winMsg.style.display = "none";
+    levelDisplay.textContent = "Level: " + level;
+
+    // Reset caterpillar position
+    headPos = { x: 50, y: 50 };
+    head.style.left = "50px";
+    head.style.top = "50px";
+
+    // Remove old segments
+    segments.forEach(s => s.remove());
+    segments = [];
+
+    // Remove old leaves
+    leaves.forEach(l => l.remove());
+    leaves = [];
+
+    // Add new leaves
+    const totalLeaves = leavesPerLevel + (level - 1) * 2;
+    for (let i = 0; i < totalLeaves; i++) {
+      const leaf = document.createElement('div');
+      leaf.className = 'leaf';
+      leaf.style.left = Math.random() * (play.clientWidth - 30) + 'px';
+      leaf.style.top = Math.random() * (play.clientHeight - 30) + 'px';
+      play.appendChild(leaf);
+      leaves.push(leaf);
+    }
   }
 
-  // Listen to arrow keys
-  document.addEventListener('keydown', e=>{
-    if(e.key==='ArrowUp') headPos.y -= speed;
-    if(e.key==='ArrowDown') headPos.y += speed;
-    if(e.key==='ArrowLeft') headPos.x -= speed;
-    if(e.key==='ArrowRight') headPos.x += speed;
-    // keep inside play area
-    headPos.x = Math.max(0, Math.min(play.clientWidth-40, headPos.x));
-    headPos.y = Math.max(0, Math.min(play.clientHeight-40, headPos.y));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp') headPos.y -= speed;
+    if (e.key === 'ArrowDown') headPos.y += speed;
+    if (e.key === 'ArrowLeft') headPos.x -= speed;
+    if (e.key === 'ArrowRight') headPos.x += speed;
+
+    // Keep inside play area
+    headPos.x = Math.max(0, Math.min(play.clientWidth - 40, headPos.x));
+    headPos.y = Math.max(0, Math.min(play.clientHeight - 40, headPos.y));
   });
 
-  function update(){
-    // move head
-    head.style.left = headPos.x+'px';
-    head.style.top = headPos.y+'px';
+  function update() {
+    head.style.left = headPos.x + 'px';
+    head.style.top = headPos.y + 'px';
 
-    // move segments to follow head
-    let prevX = headPos.x;
-    let prevY = headPos.y;
-    segments.forEach(seg=>{
-      const segX = parseFloat(seg.style.left || prevX);
-      const segY = parseFloat(seg.style.top || prevY);
-      // simple follow
-      seg.style.left = segX + (prevX - segX)*0.2 +'px';
-      seg.style.top = segY + (prevY - segY)*0.2 +'px';
-      prevX = segX;
-      prevY = segY;
+    // Follow movement
+    let px = headPos.x, py = headPos.y;
+    segments.forEach(seg => {
+      const sx = parseFloat(seg.style.left);
+      const sy = parseFloat(seg.style.top);
+
+      seg.style.left = sx + (px - sx) * 0.2 + 'px';
+      seg.style.top = sy + (py - sy) * 0.2 + 'px';
+
+      px = sx;
+      py = sy;
     });
 
-    // check collision with leaves
-    leaves.forEach((leaf, idx)=>{
-      const lx = leaf.offsetLeft, ly = leaf.offsetTop;
-      if(Math.abs(lx - headPos.x)<35 && Math.abs(ly - headPos.y)<35){
+    // Collision with leaves
+    leaves.forEach((leaf, idx) => {
+      const lx = leaf.offsetLeft,
+            ly = leaf.offsetTop;
+
+      if (Math.abs(lx - headPos.x) < 35 && Math.abs(ly - headPos.y) < 35) {
         leaf.remove();
-        leaves.splice(idx,1);
+        leaves.splice(idx, 1);
         addSegment();
+
+        // If all leaves eaten
+        if (leaves.length === 0) {
+          if (level < maxLevel) {
+            winMsg.textContent = `Level ${level} Complete! Next Level Loading...`;
+            winMsg.style.display = "block";
+            level++;
+            setTimeout(startLevel, 1500);
+          } else {
+            winMsg.textContent = "🏆 Game Completed! Your Caterpillar is a Legend!";
+            winMsg.style.display = "block";
+          }
+        }
       }
     });
 
     requestAnimationFrame(update);
   }
 
-  function addSegment(){
+  function addSegment() {
     const seg = document.createElement('div');
-    seg.className='segment';
-    // start segment at head position
-    seg.style.left = headPos.x+'px';
-    seg.style.top = headPos.y+'px';
+    seg.className = 'segment';
+    seg.style.left = headPos.x + 'px';
+    seg.style.top = headPos.y + 'px';
     play.appendChild(seg);
     segments.push(seg);
-
-    if(segments.length===totalLeaves){
-      winMsg.style.display='block';
-    }
   }
 
+  startLevel();
   update();
 </script>
 </body>
