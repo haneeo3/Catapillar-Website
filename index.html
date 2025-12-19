@@ -249,12 +249,14 @@ function getAverageDirection() {
 
 /* GAME LOOP */
 function update() {
+  // Move head only by player input
   head.style.left = headPos.x + 'px';
   head.style.top = headPos.y + 'px';
 
   movementHistory.push({ x: headPos.x, y: headPos.y });
   if (movementHistory.length > 12) movementHistory.shift();
 
+  // Caterpillar segments
   let px = headPos.x, py = headPos.y;
   segments.forEach(seg => {
     let sx = parseFloat(seg.style.left);
@@ -265,6 +267,7 @@ function update() {
     py = sy;
   });
 
+  // AI movement
   if (movementHistory.length > 5) {
     let dir = getAverageDirection();
     let predictedX = headPos.x + dir.dx * 5;
@@ -274,20 +277,24 @@ function update() {
     let dy = ai.y - predictedY;
     let dist = Math.hypot(dx, dy) || 1;
 
-    ai.x += (dx / dist) * ai.speed;
-    ai.y += (dy / dist) * ai.speed;
+    let panic = dist < 120 ? 1.6 : 1;
+    ai.x += (dx / dist) * ai.speed * panic;
+    ai.y += (dy / dist) * ai.speed * panic;
+
+    // occasional AI mistake
+    if (Math.random() < 0.02) {
+      ai.x += (Math.random() - 0.5) * 40;
+      ai.y += (Math.random() - 0.5) * 40;
+    }
   }
 
+  // Keep AI inside bounds
+  ai.x = Math.max(0, Math.min(play.clientWidth - 30, ai.x));
+  ai.y = Math.max(0, Math.min(play.clientHeight - 30, ai.y));
   ai.el.style.left = ai.x + 'px';
   ai.el.style.top = ai.y + 'px';
 
-  let chaseDX = ai.x - headPos.x;
-  let chaseDY = ai.y - headPos.y;
-  let chaseDist = Math.hypot(chaseDX, chaseDY) || 1;
-
-  headPos.x += (chaseDX / chaseDist) * 0.5;
-  headPos.y += (chaseDY / chaseDist) * 0.5;
-
+  // Collect leaves
   leaves.forEach((leaf, idx) => {
     if (Math.abs(leaf.offsetLeft - headPos.x) < 35 &&
         Math.abs(leaf.offsetTop - headPos.y) < 35) {
@@ -297,6 +304,7 @@ function update() {
     }
   });
 
+  // Catch AI
   if (Math.abs(ai.x - headPos.x) < 30 &&
       Math.abs(ai.y - headPos.y) < 30) {
     addSegment();
