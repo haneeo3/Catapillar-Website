@@ -4,143 +4,150 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Caterpillar Garden</title>
+
 <style>
   body {
-    margin:0;
-    font-family:sans-serif;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
+    margin: 0;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     background: linear-gradient(#a8e6a0, #87d37c);
-    overflow:hidden;
+    overflow: hidden;
   }
 
   /* HOME SCREEN */
   .home-screen {
-    position:absolute;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.3);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    z-index:20;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 20;
   }
 
   .home-box {
-    background:#ffffff;
-    padding:25px;
-    width:350px;
-    border-radius:12px;
-    text-align:center;
-    border:2px solid #4caf50;
+    background: #ffffff;
+    padding: 25px;
+    width: 350px;
+    border-radius: 12px;
+    text-align: center;
+    border: 2px solid #4caf50;
   }
 
   .title {
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:20px;
+    font-size: 16px;
+    margin-bottom: 20px;
   }
 
   .menu-btn {
-    display:block;
-    width:100%;
-    padding:10px;
-    margin:8px 0;
-    background:#4caf50;
-    color:#fff;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:16px;
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    background: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
   }
+
   .menu-btn:hover {
-    background:#3d8d41;
+    background: #3d8d41;
   }
 
   /* GAME AREA */
   .play {
-    position:relative;
-    width:600px;
-    height:400px;
-    background:#bfe7a1;
-    border:2px solid #4caf50;
-    border-radius:12px;
-    overflow:hidden;
+    position: relative;
+    width: 600px;
+    height: 400px;
+    background: #bfe7a1;
+    border: 2px solid #4caf50;
+    border-radius: 12px;
+    overflow: hidden;
   }
 
   .caterpillar-head, .segment {
-    position:absolute;
-    width:40px;
-    height:40px;
-    border-radius:50%;
-    background:#2e7d32;
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #2e7d32;
   }
 
-  .caterpillar-head::before, .caterpillar-head::after {
-    content:"";
-    position:absolute;
-    top:10px;
-    width:6px;
-    height:6px;
-    border-radius:50%;
-    background:#fff;
+  .caterpillar-head::before, 
+  .caterpillar-head::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #fff;
   }
-  .caterpillar-head::after { left:20px; }
+  .caterpillar-head::after { left: 20px; }
 
   .leaf {
-    position:absolute;
-    width:30px;
-    height:30px;
-    border-radius:50%;
-    background:#66bb6a;
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #66bb6a;
+  }
+
+  .ai-runner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ff5252;
   }
 
   .win {
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%, -50%);
-    padding:16px 24px;
-    background:#ffeb3b;
-    border:2px solid #f9a825;
-    border-radius:12px;
-    font-weight:bold;
-    font-size:18px;
-    display:none;
-    z-index:10;
-    text-align:center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 16px 24px;
+    background: #ffeb3b;
+    border: 2px solid #f9a825;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 18px;
+    display: none;
+    z-index: 10;
+    text-align: center;
   }
 
   .level-label {
-    position:absolute;
-    top:10px;
-    left:10px;
-    font-size:18px;
-    background:#fff;
-    padding:6px 10px;
-    border-radius:6px;
-    border:1px solid #4caf50;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 18px;
+    background: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #4caf50;
   }
 </style>
 </head>
+
 <body>
 
 <!-- HOME SCREEN -->
 <div class="home-screen" id="homeScreen">
   <div class="home-box">
     <div class="title">
-      Hi guys, this project was created in 2022.  
-      I keep updating it hopefully every month.  
-      From high school to university, still making you better little caterpillar.
+      Created in 2022.  
+      Improved across years.  
+      Still growing, just like this caterpillar 🐛
     </div>
-
     <button class="menu-btn" onclick="startGame()">Play</button>
-    <button class="menu-btn">Settings</button>
-    <button class="menu-btn">Credits</button>
-    <button class="menu-btn">Highscore</button>
   </div>
 </div>
 
@@ -152,114 +159,167 @@
 </div>
 
 <script>
-  const homeScreen = document.getElementById('homeScreen');
+/* BASIC SETUP */
+const homeScreen = document.getElementById('homeScreen');
+const play = document.getElementById('play');
+const head = document.getElementById('head');
+const winMsg = document.getElementById('win');
+const levelDisplay = document.getElementById('levelDisplay');
 
-  function startGame() {
-    homeScreen.style.display = "none";
+function startGame() {
+  homeScreen.style.display = "none";
+}
+
+/* GAME STATE */
+let headPos = { x: 50, y: 50 };
+let speed = 10;
+let segments = [];
+let leaves = [];
+
+let level = 1;
+let maxLevel = 5;
+let leavesPerLevel = 5;
+
+/* AI RUNNER */
+let ai = {
+  x: 300,
+  y: 200,
+  speed: 2,
+  el: null
+};
+
+/* PLAYER MOVEMENT MEMORY */
+let movementHistory = [];
+
+/* START LEVEL */
+function startLevel() {
+  winMsg.style.display = "none";
+  levelDisplay.textContent = "Level: " + level;
+
+  headPos = { x: 50, y: 50 };
+  head.style.left = "50px";
+  head.style.top = "50px";
+
+  segments.forEach(s => s.remove());
+  segments = [];
+
+  leaves.forEach(l => l.remove());
+  leaves = [];
+
+  const totalLeaves = leavesPerLevel + (level - 1) * 2;
+  for (let i = 0; i < totalLeaves; i++) {
+    const leaf = document.createElement('div');
+    leaf.className = 'leaf';
+    leaf.style.left = Math.random() * (play.clientWidth - 30) + 'px';
+    leaf.style.top = Math.random() * (play.clientHeight - 30) + 'px';
+    play.appendChild(leaf);
+    leaves.push(leaf);
   }
 
-  /* ORIGINAL GAME SCRIPT CONTINUES */
-  const play = document.getElementById('play');
-  const head = document.getElementById('head');
-  const winMsg = document.getElementById('win');
-  const levelDisplay = document.getElementById('levelDisplay');
-
-  let headPos = { x: 50, y: 50 };
-  const speed = 10;
-  let segments = [];
-  let leaves = [];
-
-  let level = 1;
-  let maxLevel = 5;
-  let leavesPerLevel = 5;
-
-  function startLevel() {
-    winMsg.style.display = "none";
-    levelDisplay.textContent = "Level: " + level;
-
-    headPos = { x: 50, y: 50 };
-    head.style.left = "50px";
-    head.style.top = "50px";
-
-    segments.forEach(s => s.remove());
-    segments = [];
-
-    leaves.forEach(l => l.remove());
-    leaves = [];
-
-    const totalLeaves = leavesPerLevel + (level - 1) * 2;
-    for (let i = 0; i < totalLeaves; i++) {
-      const leaf = document.createElement('div');
-      leaf.className = 'leaf';
-      leaf.style.left = Math.random() * (play.clientWidth - 30) + 'px';
-      leaf.style.top = Math.random() * (play.clientHeight - 30) + 'px';
-      play.appendChild(leaf);
-      leaves.push(leaf);
-    }
+  if (!ai.el) {
+    ai.el = document.createElement('div');
+    ai.el.className = 'ai-runner';
+    play.appendChild(ai.el);
   }
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowUp') headPos.y -= speed;
-    if (e.key === 'ArrowDown') headPos.y += speed;
-    if (e.key === 'ArrowLeft') headPos.x -= speed;
-    if (e.key === 'ArrowRight') headPos.x += speed;
+  ai.x = Math.random() * (play.clientWidth - 30);
+  ai.y = Math.random() * (play.clientHeight - 30);
+}
 
-    headPos.x = Math.max(0, Math.min(play.clientWidth - 40, headPos.x));
-    headPos.y = Math.max(0, Math.min(play.clientHeight - 40, headPos.y));
+/* INPUT */
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowUp') headPos.y -= speed;
+  if (e.key === 'ArrowDown') headPos.y += speed;
+  if (e.key === 'ArrowLeft') headPos.x -= speed;
+  if (e.key === 'ArrowRight') headPos.x += speed;
+
+  headPos.x = Math.max(0, Math.min(play.clientWidth - 40, headPos.x));
+  headPos.y = Math.max(0, Math.min(play.clientHeight - 40, headPos.y));
+});
+
+/* AI LEARNING */
+function getAverageDirection() {
+  let dx = 0, dy = 0;
+  for (let i = 1; i < movementHistory.length; i++) {
+    dx += movementHistory[i].x - movementHistory[i - 1].x;
+    dy += movementHistory[i].y - movementHistory[i - 1].y;
+  }
+  return { dx, dy };
+}
+
+/* GAME LOOP */
+function update() {
+  head.style.left = headPos.x + 'px';
+  head.style.top = headPos.y + 'px';
+
+  movementHistory.push({ x: headPos.x, y: headPos.y });
+  if (movementHistory.length > 12) movementHistory.shift();
+
+  let px = headPos.x, py = headPos.y;
+  segments.forEach(seg => {
+    let sx = parseFloat(seg.style.left);
+    let sy = parseFloat(seg.style.top);
+    seg.style.left = sx + (px - sx) * 0.2 + 'px';
+    seg.style.top = sy + (py - sy) * 0.2 + 'px';
+    px = sx;
+    py = sy;
   });
 
-  function update() {
-    head.style.left = headPos.x + 'px';
-    head.style.top = headPos.y + 'px';
+  if (movementHistory.length > 5) {
+    let dir = getAverageDirection();
+    let predictedX = headPos.x + dir.dx * 5;
+    let predictedY = headPos.y + dir.dy * 5;
 
-    let px = headPos.x, py = headPos.y;
-    segments.forEach(seg => {
-      const sx = parseFloat(seg.style.left);
-      const sy = parseFloat(seg.style.top);
+    let dx = ai.x - predictedX;
+    let dy = ai.y - predictedY;
+    let dist = Math.hypot(dx, dy) || 1;
 
-      seg.style.left = sx + (px - sx) * 0.2 + 'px';
-      seg.style.top = sy + (py - sy) * 0.2 + 'px';
-
-      px = sx;
-      py = sy;
-    });
-
-    leaves.forEach((leaf, idx) => {
-      if (Math.abs(leaf.offsetLeft - headPos.x) < 35 &&
-          Math.abs(leaf.offsetTop - headPos.y) < 35) {
-
-        leaf.remove();
-        leaves.splice(idx, 1);
-        addSegment();
-
-        if (leaves.length === 0) {
-          if (level < maxLevel) {
-            winMsg.textContent = `Level ${level} Complete! Next Level Loading...`;
-            winMsg.style.display = "block";
-            level++;
-            setTimeout(startLevel, 1500);
-          } else {
-            winMsg.textContent = "🏆 Game Completed! Your Caterpillar is a Legend!";
-            winMsg.style.display = "block";
-          }
-        }
-      }
-    });
-
-    requestAnimationFrame(update);
+    ai.x += (dx / dist) * ai.speed;
+    ai.y += (dy / dist) * ai.speed;
   }
 
-  function addSegment() {
-    const seg = document.createElement('div');
-    seg.className = 'segment';
-    seg.style.left = headPos.x + 'px';
-    seg.style.top = headPos.y + 'px';
-    play.appendChild(seg);
-    segments.push(seg);
+  ai.el.style.left = ai.x + 'px';
+  ai.el.style.top = ai.y + 'px';
+
+  let chaseDX = ai.x - headPos.x;
+  let chaseDY = ai.y - headPos.y;
+  let chaseDist = Math.hypot(chaseDX, chaseDY) || 1;
+
+  headPos.x += (chaseDX / chaseDist) * 0.5;
+  headPos.y += (chaseDY / chaseDist) * 0.5;
+
+  leaves.forEach((leaf, idx) => {
+    if (Math.abs(leaf.offsetLeft - headPos.x) < 35 &&
+        Math.abs(leaf.offsetTop - headPos.y) < 35) {
+      leaf.remove();
+      leaves.splice(idx, 1);
+      addSegment();
+    }
+  });
+
+  if (Math.abs(ai.x - headPos.x) < 30 &&
+      Math.abs(ai.y - headPos.y) < 30) {
+    addSegment();
+    ai.x = Math.random() * (play.clientWidth - 30);
+    ai.y = Math.random() * (play.clientHeight - 30);
   }
 
-  startLevel();
-  update();
+  requestAnimationFrame(update);
+}
+
+/* GROW */
+function addSegment() {
+  const seg = document.createElement('div');
+  seg.className = 'segment';
+  seg.style.left = headPos.x + 'px';
+  seg.style.top = headPos.y + 'px';
+  play.appendChild(seg);
+  segments.push(seg);
+}
+
+startLevel();
+update();
 </script>
+
 </body>
 </html>
