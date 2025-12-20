@@ -3,156 +3,79 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Caterpillar Garden Pro</title>
+<title>Caterpillar Garden: Boss Edition</title>
 <style>
-    :root {
-        --primary: #4caf50;
-        --accent: #ff5252;
-        --bg: #a8e6a0;
-    }
-    body {
-        margin: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: var(--bg);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        overflow: hidden;
-        touch-action: none;
-    }
+    :root { --primary: #4caf50; --accent: #ff5252; --bg: #a8e6a0; }
+    body { margin: 0; font-family: sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
+    
     #game-container {
-        position: relative;
-        width: 100%;
-        max-width: 600px;
-        height: 100%;
-        max-height: 400px;
-        background: #e8f5e9;
-        border: 4px solid #2e7d32;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        overflow: hidden;
+        position: relative; width: 100%; max-width: 600px; height: 100%; max-height: 400px;
+        background: #e8f5e9; border: 4px solid #2e7d32; border-radius: 12px; overflow: hidden;
     }
-    .overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(0,0,0,0.8);
-        color: white;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 100;
-        text-align: center;
-        padding: 20px;
-    }
+
+    /* UI PANELS */
+    .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center; }
     .hidden { display: none !important; }
 
-    .caterpillar-head {
-        position: absolute;
-        width: 30px;
-        height: 30px;
-        background: #1b5e20;
-        border-radius: 50%;
-        z-index: 10;
-        transition: transform 0.1s;
+    /* IN-GAME HUD */
+    .hud {
+        position: absolute; top: 0; left: 0; right: 0; padding: 10px;
+        display: flex; justify-content: space-between; align-items: center; z-index: 50;
+        background: rgba(255,255,255,0.2); backdrop-filter: blur(5px);
     }
-    .segment {
-        position: absolute;
-        width: 25px;
-        height: 25px;
-        background: var(--primary);
-        border-radius: 50%;
-        z-index: 5;
+    .hud-group { display: flex; gap: 10px; align-items: center; }
+    .stat-box { background: white; padding: 4px 10px; border-radius: 15px; color: #2e7d32; font-weight: bold; font-size: 14px; }
+
+    /* BUTTONS */
+    .btn { padding: 8px 15px; border-radius: 20px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-pause { background: #ff9800; color: white; }
+    .btn-exit { background: #f44336; color: white; }
+    .btn-main { background: var(--primary); color: white; padding: 12px 30px; font-size: 18px; margin: 10px; }
+
+    /* GAME OBJECTS */
+    .caterpillar-head { position: absolute; width: 26px; height: 26px; background: #1b5e20; border-radius: 50%; z-index: 10; }
+    .segment { position: absolute; width: 22px; height: 22px; background: var(--primary); border-radius: 50%; z-index: 5; }
+    .leaf { position: absolute; width: 18px; height: 18px; background: #8bc34a; border-radius: 20% 80%; transform: rotate(45deg); }
+    .ai-runner { 
+        position: absolute; width: 24px; height: 24px; background: var(--accent); border-radius: 50%; 
+        box-shadow: 0 0 15px var(--accent); border: 2px solid white; animation: pulse 0.5s infinite alternate;
     }
-    .leaf {
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        background: #8bc34a;
-        border-radius: 20% 80% 20% 80%;
-        transform: rotate(45deg);
-    }
-    .ai-runner {
-        position: absolute;
-        width: 25px;
-        height: 25px;
-        background: var(--accent);
-        border-radius: 50%;
-        border: 2px solid white;
-    }
-    .stats {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        right: 10px;
-        display: flex;
-        justify-content: space-between;
-        pointer-events: none;
-        z-index: 20;
-    }
-    .stat-pill {
-        background: rgba(255,255,255,0.9);
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-weight: bold;
-        color: #2e7d32;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    button {
-        padding: 12px 30px;
-        font-size: 18px;
-        background: var(--primary);
-        color: white;
-        border: none;
-        border-radius: 25px;
-        cursor: pointer;
-        margin: 10px;
-        transition: 0.2s;
-    }
-    button:hover { transform: scale(1.05); background: #388e3c; }
-    #leaderboard {
-        font-size: 14px;
-        margin-top: 15px;
-        width: 100%;
-        max-width: 200px;
-    }
-    .lb-row { display: flex; justify-content: space-between; border-bottom: 1px solid #444; }
-    
-    /* Mobile Controls Info */
-    .mobile-hint {
-        position: absolute;
-        bottom: 10px;
-        font-size: 12px;
-        opacity: 0.6;
-    }
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.2); } }
+
+    #leaderboard-list { width: 80%; margin: 15px 0; }
+    .lb-row { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #444; }
 </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div class="stats">
-        <div class="stat-pill">Score: <span id="scoreVal">0</span></div>
-        <div class="stat-pill">High: <span id="highVal">0</span></div>
-        <div class="stat-pill" id="muteBtn" style="pointer-events: auto; cursor: pointer;">🔊</div>
+    <div id="hud" class="hud hidden">
+        <div class="hud-group">
+            <div class="stat-box">Score: <span id="scoreVal">0</span></div>
+            <button class="btn btn-pause" onclick="togglePause()">PAUSE</button>
+        </div>
+        <div class="hud-group">
+            <button class="btn btn-exit" onclick="exitToMenu()">EXIT</button>
+            <div id="muteBtn" style="cursor:pointer; font-size: 20px;">🔊</div>
+        </div>
     </div>
 
     <div id="start-screen" class="overlay">
-        <h1>Caterpillar Garden</h1>
-        <p>Use Arrows or Tap Sides to Turn</p>
-        <button onclick="initGame()">Start Game</button>
-        <div id="leaderboard"></div>
+        <h1 style="margin:0; color: var(--primary);">CATERPILLAR GARDEN</h1>
+        <div id="leaderboard-list"></div>
+        <button class="btn btn-main" onclick="initGame()">PLAY GAME</button>
     </div>
 
     <div id="pause-screen" class="overlay hidden">
-        <h1>Paused</h1>
-        <button onclick="togglePause()">Resume</button>
+        <h1>PAUSED</h1>
+        <button class="btn btn-main" onclick="togglePause()">RESUME</button>
     </div>
 
     <div id="gameover-screen" class="overlay hidden">
         <h1 style="color: var(--accent)">GAME OVER</h1>
         <p>Final Score: <span id="finalScore">0</span></p>
-        <button onclick="initGame()">Try Again</button>
+        <button class="btn btn-main" onclick="initGame()">PLAY AGAIN</button>
+        <button class="btn btn-exit" onclick="exitToMenu()">LEADERBOARD</button>
     </div>
 
     <div id="game-world"></div>
@@ -160,37 +83,22 @@
 
 <script>
     const world = document.getElementById('game-world');
+    const hud = document.getElementById('hud');
     const scoreVal = document.getElementById('scoreVal');
-    const highVal = document.getElementById('highVal');
     const muteBtn = document.getElementById('muteBtn');
     
-    // Game Constants
-    const SEGMENT_SPACING = 15;
-    const INITIAL_SPEED = 3;
-    
-    // State
     let state = {
-        playing: false,
-        paused: false,
-        score: 0,
-        highScore: localStorage.getItem('catHighScore') || 0,
-        muted: false,
-        level: 1
+        playing: false, paused: false,
+        score: 0, muted: false,
+        lastBossScore: 0, bossActive: false
     };
 
-    let player = {
-        x: 100, y: 100,
-        angle: 0,
-        speed: INITIAL_SPEED,
-        segments: [],
-        history: []
-    };
-
-    let ai = { x: 300, y: 200, speed: 1.5, el: null };
+    let player = { x: 200, y: 200, angle: 0, speed: 3, segments: [], history: [] };
+    let ai = { x: 0, y: 0, speed: 2, el: null, timer: 0 };
     let leaves = [];
     let keys = {};
 
-    // Audio Context
+    // Audio
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(freq, type, duration) {
         if (state.muted) return;
@@ -198,98 +106,107 @@
         const gain = audioCtx.createGain();
         osc.type = type;
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
     }
 
     function initGame() {
         document.querySelectorAll('.overlay').forEach(el => el.classList.add('hidden'));
+        hud.classList.remove('hidden');
         world.innerHTML = '';
         state.playing = true;
         state.paused = false;
         state.score = 0;
-        state.level = 1;
+        state.lastBossScore = 0;
+        state.bossActive = false;
         scoreVal.textContent = "0";
         
         player.x = 200; player.y = 200;
-        player.angle = 0;
-        player.speed = INITIAL_SPEED;
-        player.segments = [];
-        player.history = [];
+        player.angle = 0; player.speed = 3;
+        player.segments = []; player.history = [];
         
         player.headEl = document.createElement('div');
         player.headEl.className = 'caterpillar-head';
         world.appendChild(player.headEl);
 
-        ai.el = document.createElement('div');
-        ai.el.className = 'ai-runner';
-        world.appendChild(ai.el);
-
         spawnLeaf();
-        updateLeaderboard();
         gameLoop();
     }
 
     function spawnLeaf() {
         const leaf = document.createElement('div');
         leaf.className = 'leaf';
-        const x = Math.random() * (world.parentNode.clientWidth - 30);
-        const y = Math.random() * (world.parentNode.clientHeight - 30);
+        const x = 20 + Math.random() * (world.parentNode.clientWidth - 40);
+        const y = 50 + Math.random() * (world.parentNode.clientHeight - 70);
         leaf.style.left = x + 'px';
         leaf.style.top = y + 'px';
         world.appendChild(leaf);
         leaves.push({x, y, el: leaf});
     }
 
+    function spawnBoss() {
+        if (state.bossActive) return;
+        playSound(400, 'square', 0.3);
+        state.bossActive = true;
+        ai.el = document.createElement('div');
+        ai.el.className = 'ai-runner';
+        ai.x = Math.random() * 500;
+        ai.y = Math.random() * 300;
+        world.appendChild(ai.el);
+        
+        // Boss vanishes after 15 seconds if not caught
+        ai.timer = setTimeout(() => {
+            despawnBoss();
+        }, 15000);
+    }
+
+    function despawnBoss() {
+        if (ai.el) ai.el.remove();
+        state.bossActive = false;
+        clearTimeout(ai.timer);
+    }
+
+    function checkHighscore() {
+        let lb = JSON.parse(localStorage.getItem('catLB') || '[]');
+        const isHigh = lb.length < 5 || state.score > lb[lb.length-1].score;
+        
+        if (isHigh) {
+            const name = prompt("NEW HIGH SCORE! Enter your name:", "Player 1") || "Anonymous";
+            lb.push({name, score: state.score});
+            lb.sort((a,b) => b.score - a.score);
+            localStorage.setItem('catLB', JSON.stringify(lb.slice(0, 5)));
+        }
+        updateLeaderboardDisplay();
+    }
+
+    function updateLeaderboardDisplay() {
+        const lb = JSON.parse(localStorage.getItem('catLB') || '[]');
+        const container = document.getElementById('leaderboard-list');
+        container.innerHTML = '<h3 style="margin-bottom:5px">LEADERBOARD</h3>' + 
+            lb.map(i => `<div class="lb-row"><span>${i.name}</span><span>${i.score}</span></div>`).join('');
+    }
+
+    function exitToMenu() {
+        state.playing = false;
+        hud.classList.add('hidden');
+        document.querySelectorAll('.overlay').forEach(el => el.classList.add('hidden'));
+        document.getElementById('start-screen').classList.remove('hidden');
+        updateLeaderboardDisplay();
+    }
+
     function gameOver() {
         state.playing = false;
-        playSound(150, 'sawtooth', 0.5);
+        playSound(100, 'sawtooth', 0.6);
         document.getElementById('gameover-screen').classList.remove('hidden');
         document.getElementById('finalScore').textContent = state.score;
-        
-        if (state.score > state.highScore) {
-            state.highScore = state.score;
-            localStorage.setItem('catHighScore', state.highScore);
-            saveToLeaderboard(state.score);
-        }
-        highVal.textContent = state.highScore;
+        checkHighscore();
     }
 
-    function saveToLeaderboard(score) {
-        let lb = JSON.parse(localStorage.getItem('catLeaderboard') || '[]');
-        lb.push({score, date: new Date().toLocaleDateString()});
-        lb.sort((a,b) => b.score - a.score);
-        localStorage.setItem('catLeaderboard', JSON.stringify(lb.slice(0, 5)));
-    }
-
-    function updateLeaderboard() {
-        const lb = JSON.parse(localStorage.getItem('catLeaderboard') || '[]');
-        const container = document.getElementById('leaderboard');
-        container.innerHTML = '<b>Top Scores</b>' + lb.map(i => `<div class="lb-row"><span>${i.date}</span><span>${i.score}</span></div>`).join('');
-    }
-
-    // Input Handling
-    window.addEventListener('keydown', e => { 
-        keys[e.code] = true; 
-        if(e.code === 'Escape') togglePause();
-    });
+    // Inputs
+    window.addEventListener('keydown', e => keys[e.code] = true);
     window.addEventListener('keyup', e => keys[e.code] = false);
     
-    // Mobile Touch
-    window.addEventListener('touchstart', e => {
-        const touchX = e.touches[0].clientX;
-        if (touchX < window.innerWidth / 2) keys['ArrowLeft'] = true;
-        else keys['ArrowRight'] = true;
-    });
-    window.addEventListener('touchend', () => {
-        keys['ArrowLeft'] = false;
-        keys['ArrowRight'] = false;
-    });
-
     function togglePause() {
         state.paused = !state.paused;
         document.getElementById('pause-screen').classList.toggle('hidden', !state.paused);
@@ -303,89 +220,72 @@
     function gameLoop() {
         if (!state.playing || state.paused) return;
 
-        // 1. Player Rotation
-        if (keys['ArrowLeft']) player.angle -= 0.1;
-        if (keys['ArrowRight']) player.angle += 0.1;
+        if (keys['ArrowLeft']) player.angle -= 0.08;
+        if (keys['ArrowRight']) player.angle += 0.08;
 
-        // 2. Move Player
         player.x += Math.cos(player.angle) * player.speed;
         player.y += Math.sin(player.angle) * player.speed;
 
-        // Screen Wrap / Bounds
-        if (player.x < 0) player.x = 590;
-        if (player.x > 600) player.x = 10;
-        if (player.y < 0) player.y = 390;
-        if (player.y > 400) player.y = 10;
+        // Wrap
+        if (player.x < 0) player.x = 590; if (player.x > 600) player.x = 10;
+        if (player.y < 40) player.y = 390; if (player.y > 400) player.y = 50;
 
         player.headEl.style.left = player.x + 'px';
         player.headEl.style.top = player.y + 'px';
         player.headEl.style.transform = `rotate(${player.angle}rad)`;
 
-        // 3. Trailing segments
         player.history.unshift({x: player.x, y: player.y});
-        if (player.history.length > 500) player.history.pop();
-
         player.segments.forEach((seg, i) => {
-            const index = (i + 1) * 8;
-            const pos = player.history[index] || player.history[player.history.length-1];
+            const pos = player.history[(i + 1) * 8] || player.history[player.history.length-1];
             seg.style.left = pos.x + 'px';
             seg.style.top = pos.y + 'px';
         });
+        if (player.history.length > 800) player.history.pop();
 
-        // 4. Smarter AI (Flanking/Avoidance)
-        const dx = ai.x - player.x;
-        const dy = ai.y - player.y;
-        const dist = Math.hypot(dx, dy);
-        
-        // AI flees if player is close, else wanders
-        if (dist < 150) {
-            const moveSpeed = ai.speed * (1 + (150 - dist) / 50); // Faster as you get closer
-            ai.x += (dx / dist) * moveSpeed;
-            ai.y += (dy / dist) * moveSpeed;
-        } else {
-            ai.x += (Math.random() - 0.5) * 2;
-            ai.y += (Math.random() - 0.5) * 2;
+        // Boss Logic
+        if (state.bossActive && ai.el) {
+            const dx = ai.x - player.x, dy = ai.y - player.y, dist = Math.hypot(dx, dy);
+            if (dist < 150) {
+                ai.x += (dx / dist) * (ai.speed + 2);
+                ai.y += (dy / dist) * (ai.speed + 2);
+            }
+            ai.x = Math.max(10, Math.min(580, ai.x));
+            ai.y = Math.max(50, Math.min(380, ai.y));
+            ai.el.style.left = ai.x + 'px';
+            ai.el.style.top = ai.y + 'px';
+
+            if (dist < 25) {
+                state.score += 100;
+                scoreVal.textContent = state.score;
+                playSound(800, 'sine', 0.2);
+                despawnBoss();
+            }
         }
 
-        // AI bounds
-        ai.x = Math.max(10, Math.min(580, ai.x));
-        ai.y = Math.max(10, Math.min(380, ai.y));
-        ai.el.style.left = ai.x + 'px';
-        ai.el.style.top = ai.y + 'px';
-
-        // 5. Collisions
+        // Leaf Collision
         leaves.forEach((leaf, i) => {
-            if (Math.hypot(player.x - leaf.x, player.y - leaf.y) < 25) {
-                playSound(600 + (state.score * 10), 'sine', 0.1);
+            if (Math.hypot(player.x - leaf.x, player.y - leaf.y) < 22) {
+                playSound(600, 'sine', 0.05);
                 leaf.el.remove();
                 leaves.splice(i, 1);
-                addSegment();
                 state.score += 10;
                 scoreVal.textContent = state.score;
+                addSegment();
                 spawnLeaf();
-                // Difficulty Scaling
-                player.speed += 0.05;
-                ai.speed += 0.08;
+                
+                // Trigger Boss every 100 points
+                if (state.score % 100 === 0 && state.score !== state.lastBossScore) {
+                    state.lastBossScore = state.score;
+                    spawnBoss();
+                }
             }
         });
 
-        // AI Collision (Bonus)
-        if (dist < 25) {
-            playSound(800, 'square', 0.2);
-            state.score += 50;
-            scoreVal.textContent = state.score;
-            ai.x = Math.random() * 500;
-            ai.y = Math.random() * 300;
-            for(let i=0; i<3; i++) addSegment();
-        }
-
-        // Self Collision (Game Over)
+        // Self Collision
         if (player.segments.length > 5) {
             for (let i = 15; i < player.segments.length; i++) {
                 const segPos = player.history[(i + 1) * 8];
-                if (segPos && Math.hypot(player.x - segPos.x, player.y - segPos.y) < 10) {
-                    gameOver();
-                }
+                if (segPos && Math.hypot(player.x - segPos.x, player.y - segPos.y) < 10) gameOver();
             }
         }
 
@@ -399,8 +299,7 @@
         player.segments.push(seg);
     }
 
-    highVal.textContent = state.highScore;
-    updateLeaderboard();
+    updateLeaderboardDisplay();
 </script>
 </body>
 </html>
