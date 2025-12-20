@@ -3,287 +3,323 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Caterpillar Garden: Global Boss</title>
+<title>Caterpillar Garden: Mobile Pro</title>
 <style>
-    :root { --primary: #4caf50; --accent: #ff5252; --boss: #ff1100; --bg: #a8e6a0; }
-    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
+    :root { --primary: #4caf50; --accent: #ff5252; --bg: #a8e6a0; }
     
-    #game-container {
-        position: relative; width: 100%; max-width: 600px; height: 100%; max-height: 400px;
-        background: #e8f5e9; border: 4px solid #2e7d32; border-radius: 12px; overflow: hidden;
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body { 
+        margin: 0; font-family: sans-serif; background: #222; 
+        display: flex; justify-content: center; align-items: center; 
+        height: 100vh; overflow: hidden; touch-action: none;
     }
 
-    .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center; padding: 20px; }
+    /* Scaling Container for Mobile */
+    #game-scaler {
+        transform-origin: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    #game-container {
+        position: relative; width: 600px; height: 400px;
+        background: #e8f5e9; border: 4px solid #2e7d32; border-radius: 12px; 
+        overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    }
+
+    .overlay { 
+        position: absolute; inset: 0; background: rgba(0,0,0,0.9); 
+        color: white; display: flex; flex-direction: column; 
+        justify-content: center; align-items: center; z-index: 100; text-align: center; 
+    }
     .hidden { display: none !important; }
 
     /* MOBILE CONTROLS */
     .mobile-ctrl {
-        position: absolute; bottom: 20px; left: 0; right: 0; display: flex; 
-        justify-content: space-between; padding: 0 30px; z-index: 60; pointer-events: none;
+        position: absolute; bottom: 10px; left: 0; right: 0; 
+        display: flex; justify-content: space-between; padding: 0 20px; 
+        z-index: 110; pointer-events: none;
     }
     .ctrl-btn {
-        width: 70px; height: 70px; background: rgba(255,255,255,0.3); border: 3px solid white;
-        border-radius: 50%; display: flex; justify-content: center; align-items: center;
-        font-size: 30px; color: white; pointer-events: auto; user-select: none;
+        width: 80px; height: 80px; background: rgba(255,255,255,0.2); 
+        border: 2px solid white; border-radius: 50%; display: flex; 
+        justify-content: center; align-items: center; font-size: 40px; 
+        color: white; pointer-events: auto;
     }
 
-    /* HUD */
-    .hud { position: absolute; top: 0; left: 0; right: 0; padding: 10px; display: flex; justify-content: space-between; z-index: 50; background: rgba(0,0,0,0.1); }
-    .stat-box { background: white; padding: 4px 12px; border-radius: 15px; color: #2e7d32; font-weight: bold; }
-    #powerup-bar { color: #2196f3; font-size: 12px; display: none; }
+    /* UPDATED HUD */
+    .hud { 
+        position: absolute; top: 0; left: 0; right: 0; padding: 15px; 
+        display: flex; justify-content: space-between; z-index: 50; 
+    }
+    .hud-btn {
+        background: white; border: none; padding: 10px 15px; 
+        border-radius: 8px; font-weight: bold; cursor: pointer;
+        box-shadow: 0 4px 0 #ccc;
+    }
 
-    /* OBJECTS */
-    .caterpillar-head { position: absolute; width: 26px; height: 26px; background: #1b5e20; border-radius: 50%; z-index: 10; }
+    /* GAME OBJECTS */
+    .caterpillar-head { position: absolute; width: 26px; height: 26px; background: #1b5e20; border-radius: 50%; z-index: 10; border: 1px solid white; }
     .segment { position: absolute; width: 22px; height: 22px; background: var(--primary); border-radius: 50%; z-index: 5; }
     .leaf { position: absolute; width: 18px; height: 18px; background: #8bc34a; border-radius: 20% 80%; transform: rotate(45deg); }
-    
-    .ai-runner { 
-        position: absolute; width: 24px; height: 24px; background: var(--accent); border-radius: 50%; 
-        box-shadow: 0 0 15px var(--accent); border: 2px solid white; transition: background 0.3s;
-    }
-    .ai-angry { background: black !important; box-shadow: 0 0 20px #000; animation: shake 0.1s infinite; }
-    @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, -1px); } }
+    .ai-runner { position: absolute; width: 24px; height: 24px; background: var(--accent); border-radius: 50%; z-index: 15; border: 2px solid white; box-shadow: 0 0 10px red; }
+    .ai-angry { background: #000 !important; box-shadow: 0 0 20px #ff0000; }
 
-    /* LEADERBOARD TABLE */
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-    th { border-bottom: 2px solid var(--primary); padding: 5px; }
-    td { padding: 5px; border-bottom: 1px solid #444; }
+    #powerup-msg { position: absolute; top: 60px; width: 100%; text-align: center; color: #2196f3; font-weight: bold; display: none; }
 </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div id="hud" class="hud hidden">
-        <div style="display:flex; gap:10px;">
-            <div class="stat-box">Score: <span id="scoreVal">0</span></div>
-            <div id="powerup-bar" class="stat-box">⏳ SLOW MO</div>
+<div id="game-scaler">
+    <div id="game-container">
+        <div id="hud" class="hud hidden">
+            <div style="background:white; padding:10px; border-radius:8px; font-weight:bold;">
+                Score: <span id="scoreVal">0</span>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="hud-btn" id="pauseBtn">PAUSE</button>
+                <button class="hud-btn" style="background:#ff5252; color:white;" onclick="location.reload()">EXIT</button>
+            </div>
         </div>
-        <button onclick="togglePause()" style="border-radius:10px; border:none; padding:5px 10px; cursor:pointer;">PAUSE</button>
-    </div>
 
-    <div class="mobile-ctrl hidden" id="mobile-ui">
-        <div class="ctrl-btn" id="btn-left">◀</div>
-        <div class="ctrl-btn" id="btn-right">▶</div>
-    </div>
+        <div id="powerup-msg">⏱ SLOW MOTION ACTIVE!</div>
 
-    <div id="start-screen" class="overlay">
-        <h1 style="color: var(--primary); margin:0;">GLOBAL GARDEN</h1>
-        <div style="overflow-y:auto; width:100%; max-height:200px;">
-            <table id="lb-table">
-                <thead><tr><th>Rank</th><th>Name</th><th>Score</th></tr></thead>
-                <tbody id="lb-body"></tbody>
-            </table>
+        <div id="start-screen" class="overlay">
+            <h1 style="color:var(--primary)">CATERPILLAR GARDEN</h1>
+            <p>Catch Red Runner at 100pts for Slow-Mo!</p>
+            <button id="startBtn" style="padding:20px 40px; font-size:24px; background:var(--primary); color:white; border:none; border-radius:50px; cursor:pointer;">START GAME</button>
         </div>
-        <button onclick="initGame()" style="background:var(--primary); color:white; padding:15px 40px; border:none; border-radius:30px; font-size:20px; margin-top:15px; cursor:pointer;">START PLAYING</button>
-    </div>
 
-    <div id="gameover-screen" class="overlay hidden">
-        <h1 id="fail-title" style="color:var(--accent)">GAME OVER</h1>
-        <p>Score: <span id="finalScore">0</span></p>
-        <button onclick="initGame()" style="padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:5px;">TRY AGAIN</button>
-        <button onclick="location.reload()" style="margin-top:10px; background:none; color:white; border:1px solid white;">MENU</button>
-    </div>
+        <div id="gameover-screen" class="overlay hidden">
+            <h1 style="color:var(--accent)">GAME OVER</h1>
+            <p>Score: <span id="finalScore">0</span></p>
+            <button onclick="location.reload()" style="padding:15px 30px; background:var(--primary); color:white; border:none; border-radius:10px;">MAIN MENU</button>
+        </div>
 
-    <div id="game-world"></div>
+        <div id="game-world"></div>
+        
+        <div class="mobile-ctrl hidden" id="mobile-ui">
+            <div class="ctrl-btn" id="btn-left">◀</div>
+            <div class="ctrl-btn" id="btn-right">▶</div>
+        </div>
+    </div>
 </div>
 
 <script>
     const world = document.getElementById('game-world');
     const hud = document.getElementById('hud');
     const scoreVal = document.getElementById('scoreVal');
-    const mobileUI = document.getElementById('mobile-ui');
-    
+    const container = document.getElementById('game-container');
+    const scaler = document.getElementById('game-scaler');
+
     let state = {
         playing: false, paused: false, score: 0,
-        slowMo: false, slowMoTimer: null,
-        bossState: 'none', // none, flee, hunt
-        bossTimer: 0
+        slowMo: false, bossActive: false, bossState: 'none'
     };
 
-    let player = { x: 200, y: 200, angle: 0, speed: 3, segments: [], history: [] };
-    let ai = { x: 0, y: 0, speed: 2.2, el: null };
+    let player = { x: 200, y: 200, angle: 0, speed: 3.5, segments: [], history: [] };
+    let ai = { x: 0, y: 0, el: null };
     let leaves = [];
     let keys = {};
 
-    // --- GLOBAL LEADERBOARD LOGIC (MOCKED) ---
-    // Note: To make this TRULY global, you would use a fetch() call to a database like Firebase.
-    function getGlobalScores() {
-        let scores = JSON.parse(localStorage.getItem('globalScores') || "[]");
-        if(scores.length === 0) {
-            scores = [
-                {name: "ProCaterpillar", score: 1500},
-                {name: "LeafEater99", score: 1200},
-                {name: "Speedy", score: 800}
-            ];
-        }
-        return scores;
+    // --- SOUND ENGINE ---
+    let audioCtx;
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
 
-    function saveGlobalScore(name, score) {
-        let scores = getGlobalScores();
-        scores.push({name, score});
-        scores.sort((a,b) => b.score - a.score);
-        localStorage.setItem('globalScores', JSON.stringify(scores.slice(0, 10)));
+    function playSfx(freq, type, duration) {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
     }
 
-    function renderLeaderboard() {
-        const body = document.getElementById('lb-body');
-        body.innerHTML = getGlobalScores().map((s, i) => `
-            <tr><td>#${i+1}</td><td>${s.name}</td><td>${s.score}</td></tr>
-        `).join('');
+    // --- RESPONSIVENESS FIX ---
+    function resizeGame() {
+        const padding = 20;
+        const scale = Math.min(
+            (window.innerWidth - padding) / 600,
+            (window.innerHeight - padding) / 400
+        );
+        scaler.style.transform = `scale(${scale})`;
     }
+    window.addEventListener('resize', resizeGame);
+    resizeGame();
 
-    // --- GAME ENGINE ---
+    // --- INPUTS ---
+    document.getElementById('startBtn').onclick = () => {
+        initAudio();
+        initGame();
+    };
+
+    document.getElementById('pauseBtn').onclick = () => {
+        state.paused = !state.paused;
+        document.getElementById('pauseBtn').textContent = state.paused ? "RESUME" : "PAUSE";
+    };
+
+    window.addEventListener('keydown', e => keys[e.code] = true);
+    window.addEventListener('keyup', e => keys[e.code] = false);
+
+    const leftBtn = document.getElementById('btn-left');
+    const rightBtn = document.getElementById('btn-right');
+    
+    const setupTouch = (btn, key) => {
+        btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
+        btn.addEventListener('touchend', () => keys[key] = false);
+    };
+    setupTouch(leftBtn, 'ArrowLeft');
+    setupTouch(rightBtn, 'ArrowRight');
+
+    // --- GAME LOGIC ---
     function initGame() {
-        document.querySelectorAll('.overlay').forEach(el => el.classList.add('hidden'));
+        document.getElementById('start-screen').classList.add('hidden');
         hud.classList.remove('hidden');
-        if('ontouchstart' in window) mobileUI.classList.remove('hidden');
+        if('ontouchstart' in window) document.getElementById('mobile-ui').classList.remove('hidden');
         
         world.innerHTML = '';
-        state.playing = true; state.score = 0;
-        state.bossState = 'none';
-        scoreVal.textContent = "0";
-        
-        player.x = 200; player.y = 200; player.angle = 0;
+        state.playing = true; state.score = 0; scoreVal.textContent = "0";
         player.segments = []; player.history = [];
         player.headEl = document.createElement('div');
         player.headEl.className = 'caterpillar-head';
         world.appendChild(player.headEl);
-
+        
         spawnLeaf();
-        gameLoop();
+        requestAnimationFrame(gameLoop);
     }
 
     function spawnBoss() {
+        state.bossActive = true;
         state.bossState = 'flee';
         ai.el = document.createElement('div');
         ai.el.className = 'ai-runner';
         ai.x = Math.random() * 500; ai.y = Math.random() * 300;
         world.appendChild(ai.el);
+        playSfx(200, 'square', 0.3);
 
-        // 10s flee then 10s hunt
+        // Timeline: 10s Flee -> 10s Hunt -> Gone
         setTimeout(() => {
-            if(state.bossState === 'flee') {
+            if(state.bossActive && state.bossState === 'flee') {
                 state.bossState = 'hunt';
                 ai.el.classList.add('ai-angry');
+                playSfx(100, 'sawtooth', 0.5);
             }
         }, 10000);
 
         setTimeout(() => {
-            if(state.bossState === 'hunt') despawnBoss();
+            if(state.bossActive && state.bossState === 'hunt') despawnBoss();
         }, 20000);
     }
 
     function despawnBoss() {
         if(ai.el) ai.el.remove();
+        state.bossActive = false;
         state.bossState = 'none';
     }
 
-    function activateSlowMo() {
-        state.slowMo = true;
-        document.getElementById('powerup-bar').style.display = 'block';
-        clearTimeout(state.slowMoTimer);
-        state.slowMoTimer = setTimeout(() => {
-            state.slowMo = false;
-            document.getElementById('powerup-bar').style.display = 'none';
-        }, 5000);
-    }
-
-    function gameOver(msg = "GAME OVER") {
-        state.playing = false;
-        document.getElementById('gameover-screen').classList.remove('hidden');
-        document.getElementById('fail-title').textContent = msg;
-        document.getElementById('finalScore').textContent = state.score;
-        
-        setTimeout(() => {
-            const name = prompt("Global Ranking! Enter Name:");
-            if(name) {
-                saveGlobalScore(name, state.score);
-                renderLeaderboard();
-            }
-        }, 500);
-    }
-
-    // Input Logic
-    window.addEventListener('keydown', e => keys[e.code] = true);
-    window.addEventListener('keyup', e => keys[e.code] = false);
-    
-    // Mobile Touch Bindings
-    document.getElementById('btn-left').ontouchstart = (e) => { e.preventDefault(); keys['ArrowLeft'] = true; };
-    document.getElementById('btn-left').ontouchend = () => keys['ArrowLeft'] = false;
-    document.getElementById('btn-right').ontouchstart = (e) => { e.preventDefault(); keys['ArrowRight'] = true; };
-    document.getElementById('btn-right').ontouchend = () => keys['ArrowRight'] = false;
-
     function gameLoop() {
-        if (!state.playing || state.paused) return;
+        if (!state.playing) return;
+        if (state.paused) { requestAnimationFrame(gameLoop); return; }
 
-        const turnSpeed = 0.08;
-        if (keys['ArrowLeft']) player.angle -= turnSpeed;
-        if (keys['ArrowRight']) player.angle += turnSpeed;
+        // Rotation
+        if (keys['ArrowLeft']) player.angle -= 0.08;
+        if (keys['ArrowRight']) player.angle += 0.08;
 
-        // Slow Mo Effect
-        const currentSpeed = state.slowMo ? player.speed * 0.5 : player.speed;
-        player.x += Math.cos(player.angle) * currentSpeed;
-        player.y += Math.sin(player.angle) * currentSpeed;
+        // Move
+        const moveSpeed = state.slowMo ? player.speed * 0.5 : player.speed;
+        player.x += Math.cos(player.angle) * moveSpeed;
+        player.y += Math.sin(player.angle) * moveSpeed;
 
-        // Bounds
-        if (player.x < 0) player.x = 590; if (player.x > 600) player.x = 10;
-        if (player.y < 30) player.y = 390; if (player.y > 400) player.y = 40;
+        // Bounds Wrap
+        if (player.x < 0) player.x = 600; if (player.x > 600) player.x = 0;
+        if (player.y < 0) player.y = 400; if (player.y > 400) player.y = 0;
 
         player.headEl.style.left = player.x + 'px';
         player.headEl.style.top = player.y + 'px';
         player.headEl.style.transform = `rotate(${player.angle}rad)`;
 
+        // Body Segments
         player.history.unshift({x: player.x, y: player.y});
         player.segments.forEach((seg, i) => {
             const pos = player.history[(i + 1) * 8] || player.history[0];
             seg.style.left = pos.x + 'px'; seg.style.top = pos.y + 'px';
         });
-        if (player.history.length > 500) player.history.pop();
+        if (player.history.length > 1000) player.history.pop();
 
-        // AI BOSS LOGIC
-        if (state.bossState !== 'none' && ai.el) {
+        // Boss Interaction
+        if (state.bossActive && ai.el) {
             const dx = ai.x - player.x, dy = ai.y - player.y, dist = Math.hypot(dx, dy);
             
             if (state.bossState === 'flee') {
-                if (dist < 150) {
-                    ai.x += (dx / dist) * 4; ai.y += (dy / dist) * 4;
-                }
+                if (dist < 150) { ai.x += (dx/dist)*3; ai.y += (dy/dist)*3; }
                 if (dist < 25) {
-                    state.score += 100;
-                    scoreVal.textContent = state.score;
+                    state.score += 100; scoreVal.textContent = state.score;
+                    despawnBoss(); playSfx(800, 'sine', 0.2);
                     activateSlowMo();
-                    despawnBoss();
                 }
-            } else if (state.bossState === 'hunt') {
-                ai.x -= (dx / dist) * 2.5; ai.y -= (dy / dist) * 2.5;
-                if (dist < 20) gameOver("CAUGHT BY RED RUNNER!");
+            } else {
+                ai.x -= (dx/dist)*2; ai.y -= (dy/dist)*2; // Chasing
+                if (dist < 20) endGame();
             }
-
             ai.x = Math.max(10, Math.min(580, ai.x));
-            ai.y = Math.max(40, Math.min(380, ai.y));
+            ai.y = Math.max(10, Math.min(380, ai.y));
             ai.el.style.left = ai.x + 'px'; ai.el.style.top = ai.y + 'px';
         }
 
-        // Leaf Collision
+        // Leaf Interaction
         leaves.forEach((leaf, i) => {
             if (Math.hypot(player.x - leaf.x, player.y - leaf.y) < 25) {
                 leaf.el.remove(); leaves.splice(i, 1);
                 state.score += 10; scoreVal.textContent = state.score;
                 addSegment(); spawnLeaf();
+                playSfx(600, 'sine', 0.05);
                 if (state.score % 100 === 0) spawnBoss();
             }
         });
 
-        // Self Collision
-        if (player.segments.length > 10) {
-            for (let i = 20; i < player.segments.length; i++) {
-                const segPos = player.history[(i + 1) * 8];
-                if (segPos && Math.hypot(player.x - segPos.x, player.y - segPos.y) < 10) gameOver();
+        // Self Crash
+        if (player.segments.length > 15) {
+            for (let i = 25; i < player.segments.length; i++) {
+                const segPos = player.history[(i+1)*8];
+                if (segPos && Math.hypot(player.x - segPos.x, player.y - segPos.y) < 10) endGame();
             }
         }
 
         requestAnimationFrame(gameLoop);
+    }
+
+    function activateSlowMo() {
+        state.slowMo = true;
+        document.getElementById('powerup-msg').style.display = 'block';
+        setTimeout(() => {
+            state.slowMo = false;
+            document.getElementById('powerup-msg').style.display = 'none';
+        }, 7000);
+    }
+
+    function endGame() {
+        state.playing = false;
+        playSfx(100, 'sawtooth', 0.8);
+        document.getElementById('gameover-screen').classList.remove('hidden');
+        document.getElementById('finalScore').textContent = state.score;
+        
+        // Save Name to Global Leaderboard
+        setTimeout(() => {
+            const name = prompt("High Score! Enter Name:");
+            if(name) {
+                let lb = JSON.parse(localStorage.getItem('catLB') || '[]');
+                lb.push({name, score: state.score});
+                lb.sort((a,b) => b.score - a.score);
+                localStorage.setItem('catLB', JSON.stringify(lb.slice(0, 5)));
+            }
+        }, 500);
     }
 
     function addSegment() {
@@ -294,15 +330,13 @@
     }
 
     function spawnLeaf() {
-        const x = 20 + Math.random() * 560, y = 50 + Math.random() * 330;
+        const x = 30 + Math.random() * 540, y = 30 + Math.random() * 340;
         const leaf = document.createElement('div');
         leaf.className = 'leaf';
         leaf.style.left = x + 'px'; leaf.style.top = y + 'px';
         world.appendChild(leaf);
         leaves.push({x, y, el: leaf});
     }
-
-    renderLeaderboard();
 </script>
 </body>
 </html>
