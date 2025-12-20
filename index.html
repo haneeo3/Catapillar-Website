@@ -2,332 +2,405 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Caterpillar Garden</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Caterpillar Garden Pro</title>
 <style>
-  body {
-    margin: 0;
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(#a8e6a0, #87d37c);
-    overflow: hidden;
-  }
+    :root {
+        --primary: #4caf50;
+        --accent: #ff5252;
+        --bg: #a8e6a0;
+    }
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--bg);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+        touch-action: none;
+    }
+    #game-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        height: 100%;
+        max-height: 400px;
+        background: #e8f5e9;
+        border: 4px solid #2e7d32;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+    .overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        text-align: center;
+        padding: 20px;
+    }
+    .hidden { display: none !important; }
 
-  /* HOME SCREEN */
-  .home-screen {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.3);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    z-index: 20;
-  }
-
-  .home-box {
-    background: #ffffff;
-    padding: 25px;
-    width: 350px;
-    border-radius: 12px;
-    text-align: center;
-    border: 2px solid #4caf50;
-  }
-
-  .title {
-    font-size: 16px;
-    margin-bottom: 20px;
-  }
-
-  .menu-btn {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    background: #4caf50;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-
-  .menu-btn:hover {
-    background: #3d8d41;
-  }
-
-  /* GAME AREA */
-  .play {
-    position: relative;
-    width: 600px;
-    height: 400px;
-    background: #bfe7a1;
-    border: 2px solid #4caf50;
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  .caterpillar-head, .segment {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #2e7d32;
-  }
-
-  .caterpillar-head::before, 
-  .caterpillar-head::after {
-    content: "";
-    position: absolute;
-    top: 10px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #fff;
-  }
-  .caterpillar-head::after { left: 20px; }
-
-  .leaf {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #66bb6a;
-  }
-
-  .ai-runner {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #ff5252;
-  }
-
-  .win {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 16px 24px;
-    background: #ffeb3b;
-    border: 2px solid #f9a825;
-    border-radius: 12px;
-    font-weight: bold;
-    font-size: 18px;
-    display: none;
-    z-index: 10;
-    text-align: center;
-  }
-
-  .level-label {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 18px;
-    background: #fff;
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #4caf50;
-  }
+    .caterpillar-head {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background: #1b5e20;
+        border-radius: 50%;
+        z-index: 10;
+        transition: transform 0.1s;
+    }
+    .segment {
+        position: absolute;
+        width: 25px;
+        height: 25px;
+        background: var(--primary);
+        border-radius: 50%;
+        z-index: 5;
+    }
+    .leaf {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: #8bc34a;
+        border-radius: 20% 80% 20% 80%;
+        transform: rotate(45deg);
+    }
+    .ai-runner {
+        position: absolute;
+        width: 25px;
+        height: 25px;
+        background: var(--accent);
+        border-radius: 50%;
+        border: 2px solid white;
+    }
+    .stats {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        display: flex;
+        justify-content: space-between;
+        pointer-events: none;
+        z-index: 20;
+    }
+    .stat-pill {
+        background: rgba(255,255,255,0.9);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        color: #2e7d32;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    button {
+        padding: 12px 30px;
+        font-size: 18px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        margin: 10px;
+        transition: 0.2s;
+    }
+    button:hover { transform: scale(1.05); background: #388e3c; }
+    #leaderboard {
+        font-size: 14px;
+        margin-top: 15px;
+        width: 100%;
+        max-width: 200px;
+    }
+    .lb-row { display: flex; justify-content: space-between; border-bottom: 1px solid #444; }
+    
+    /* Mobile Controls Info */
+    .mobile-hint {
+        position: absolute;
+        bottom: 10px;
+        font-size: 12px;
+        opacity: 0.6;
+    }
 </style>
 </head>
-
 <body>
 
-<!-- HOME SCREEN -->
-<div class="home-screen" id="homeScreen">
-  <div class="home-box">
-    <div class="title">
-      Created in 2022.  
-      Improved across years.  
-      Still growing, just like this caterpillar 🐛
+<div id="game-container">
+    <div class="stats">
+        <div class="stat-pill">Score: <span id="scoreVal">0</span></div>
+        <div class="stat-pill">High: <span id="highVal">0</span></div>
+        <div class="stat-pill" id="muteBtn" style="pointer-events: auto; cursor: pointer;">🔊</div>
     </div>
-    <button class="menu-btn" onclick="startGame()">Play</button>
-  </div>
-</div>
 
-<!-- GAME AREA -->
-<div class="play" id="play">
-  <div class="level-label" id="levelDisplay">Level: 1</div>
-  <div class="caterpillar-head" id="head"></div>
-  <div class="win" id="win"></div>
+    <div id="start-screen" class="overlay">
+        <h1>Caterpillar Garden</h1>
+        <p>Use Arrows or Tap Sides to Turn</p>
+        <button onclick="initGame()">Start Game</button>
+        <div id="leaderboard"></div>
+    </div>
+
+    <div id="pause-screen" class="overlay hidden">
+        <h1>Paused</h1>
+        <button onclick="togglePause()">Resume</button>
+    </div>
+
+    <div id="gameover-screen" class="overlay hidden">
+        <h1 style="color: var(--accent)">GAME OVER</h1>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button onclick="initGame()">Try Again</button>
+    </div>
+
+    <div id="game-world"></div>
 </div>
 
 <script>
-/* BASIC SETUP */
-const homeScreen = document.getElementById('homeScreen');
-const play = document.getElementById('play');
-const head = document.getElementById('head');
-const winMsg = document.getElementById('win');
-const levelDisplay = document.getElementById('levelDisplay');
+    const world = document.getElementById('game-world');
+    const scoreVal = document.getElementById('scoreVal');
+    const highVal = document.getElementById('highVal');
+    const muteBtn = document.getElementById('muteBtn');
+    
+    // Game Constants
+    const SEGMENT_SPACING = 15;
+    const INITIAL_SPEED = 3;
+    
+    // State
+    let state = {
+        playing: false,
+        paused: false,
+        score: 0,
+        highScore: localStorage.getItem('catHighScore') || 0,
+        muted: false,
+        level: 1
+    };
 
-function startGame() {
-  homeScreen.style.display = "none";
-}
+    let player = {
+        x: 100, y: 100,
+        angle: 0,
+        speed: INITIAL_SPEED,
+        segments: [],
+        history: []
+    };
 
-/* GAME STATE */
-let headPos = { x: 50, y: 50 };
-let speed = 10;
-let segments = [];
-let leaves = [];
+    let ai = { x: 300, y: 200, speed: 1.5, el: null };
+    let leaves = [];
+    let keys = {};
 
-let level = 1;
-let maxLevel = 5;
-let leavesPerLevel = 5;
-
-/* AI RUNNER */
-let ai = {
-  x: 300,
-  y: 200,
-  speed: 2,
-  el: null
-};
-
-/* PLAYER MOVEMENT MEMORY */
-let movementHistory = [];
-
-/* START LEVEL */
-function startLevel() {
-  winMsg.style.display = "none";
-  levelDisplay.textContent = "Level: " + level;
-
-  headPos = { x: 50, y: 50 };
-  head.style.left = "50px";
-  head.style.top = "50px";
-
-  segments.forEach(s => s.remove());
-  segments = [];
-
-  leaves.forEach(l => l.remove());
-  leaves = [];
-
-  const totalLeaves = leavesPerLevel + (level - 1) * 2;
-  for (let i = 0; i < totalLeaves; i++) {
-    const leaf = document.createElement('div');
-    leaf.className = 'leaf';
-    leaf.style.left = Math.random() * (play.clientWidth - 30) + 'px';
-    leaf.style.top = Math.random() * (play.clientHeight - 30) + 'px';
-    play.appendChild(leaf);
-    leaves.push(leaf);
-  }
-
-  if (!ai.el) {
-    ai.el = document.createElement('div');
-    ai.el.className = 'ai-runner';
-    play.appendChild(ai.el);
-  }
-
-  ai.x = Math.random() * (play.clientWidth - 30);
-  ai.y = Math.random() * (play.clientHeight - 30);
-}
-
-/* INPUT */
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowUp') headPos.y -= speed;
-  if (e.key === 'ArrowDown') headPos.y += speed;
-  if (e.key === 'ArrowLeft') headPos.x -= speed;
-  if (e.key === 'ArrowRight') headPos.x += speed;
-
-  headPos.x = Math.max(0, Math.min(play.clientWidth - 40, headPos.x));
-  headPos.y = Math.max(0, Math.min(play.clientHeight - 40, headPos.y));
-});
-
-/* AI LEARNING */
-function getAverageDirection() {
-  let dx = 0, dy = 0;
-  for (let i = 1; i < movementHistory.length; i++) {
-    dx += movementHistory[i].x - movementHistory[i - 1].x;
-    dy += movementHistory[i].y - movementHistory[i - 1].y;
-  }
-  return { dx, dy };
-}
-
-/* GAME LOOP */
-function update() {
-  // Move head only by player input
-  head.style.left = headPos.x + 'px';
-  head.style.top = headPos.y + 'px';
-
-  movementHistory.push({ x: headPos.x, y: headPos.y });
-  if (movementHistory.length > 12) movementHistory.shift();
-
-  // Caterpillar segments
-  let px = headPos.x, py = headPos.y;
-  segments.forEach(seg => {
-    let sx = parseFloat(seg.style.left);
-    let sy = parseFloat(seg.style.top);
-    seg.style.left = sx + (px - sx) * 0.2 + 'px';
-    seg.style.top = sy + (py - sy) * 0.2 + 'px';
-    px = sx;
-    py = sy;
-  });
-
-  // AI movement
-  if (movementHistory.length > 5) {
-    let dir = getAverageDirection();
-    let predictedX = headPos.x + dir.dx * 5;
-    let predictedY = headPos.y + dir.dy * 5;
-
-    let dx = ai.x - predictedX;
-    let dy = ai.y - predictedY;
-    let dist = Math.hypot(dx, dy) || 1;
-
-    let panic = dist < 120 ? 1.6 : 1;
-    ai.x += (dx / dist) * ai.speed * panic;
-    ai.y += (dy / dist) * ai.speed * panic;
-
-    // occasional AI mistake
-    if (Math.random() < 0.02) {
-      ai.x += (Math.random() - 0.5) * 40;
-      ai.y += (Math.random() - 0.5) * 40;
+    // Audio Context
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(freq, type, duration) {
+        if (state.muted) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
     }
-  }
 
-  // Keep AI inside bounds
-  ai.x = Math.max(0, Math.min(play.clientWidth - 30, ai.x));
-  ai.y = Math.max(0, Math.min(play.clientHeight - 30, ai.y));
-  ai.el.style.left = ai.x + 'px';
-  ai.el.style.top = ai.y + 'px';
+    function initGame() {
+        document.querySelectorAll('.overlay').forEach(el => el.classList.add('hidden'));
+        world.innerHTML = '';
+        state.playing = true;
+        state.paused = false;
+        state.score = 0;
+        state.level = 1;
+        scoreVal.textContent = "0";
+        
+        player.x = 200; player.y = 200;
+        player.angle = 0;
+        player.speed = INITIAL_SPEED;
+        player.segments = [];
+        player.history = [];
+        
+        player.headEl = document.createElement('div');
+        player.headEl.className = 'caterpillar-head';
+        world.appendChild(player.headEl);
 
-  // Collect leaves
-  leaves.forEach((leaf, idx) => {
-    if (Math.abs(leaf.offsetLeft - headPos.x) < 35 &&
-        Math.abs(leaf.offsetTop - headPos.y) < 35) {
-      leaf.remove();
-      leaves.splice(idx, 1);
-      addSegment();
+        ai.el = document.createElement('div');
+        ai.el.className = 'ai-runner';
+        world.appendChild(ai.el);
+
+        spawnLeaf();
+        updateLeaderboard();
+        gameLoop();
     }
-  });
 
-  // Catch AI
-  if (Math.abs(ai.x - headPos.x) < 30 &&
-      Math.abs(ai.y - headPos.y) < 30) {
-    addSegment();
-    ai.x = Math.random() * (play.clientWidth - 30);
-    ai.y = Math.random() * (play.clientHeight - 30);
-  }
+    function spawnLeaf() {
+        const leaf = document.createElement('div');
+        leaf.className = 'leaf';
+        const x = Math.random() * (world.parentNode.clientWidth - 30);
+        const y = Math.random() * (world.parentNode.clientHeight - 30);
+        leaf.style.left = x + 'px';
+        leaf.style.top = y + 'px';
+        world.appendChild(leaf);
+        leaves.push({x, y, el: leaf});
+    }
 
-  requestAnimationFrame(update);
-}
+    function gameOver() {
+        state.playing = false;
+        playSound(150, 'sawtooth', 0.5);
+        document.getElementById('gameover-screen').classList.remove('hidden');
+        document.getElementById('finalScore').textContent = state.score;
+        
+        if (state.score > state.highScore) {
+            state.highScore = state.score;
+            localStorage.setItem('catHighScore', state.highScore);
+            saveToLeaderboard(state.score);
+        }
+        highVal.textContent = state.highScore;
+    }
 
-/* GROW */
-function addSegment() {
-  const seg = document.createElement('div');
-  seg.className = 'segment';
-  seg.style.left = headPos.x + 'px';
-  seg.style.top = headPos.y + 'px';
-  play.appendChild(seg);
-  segments.push(seg);
-}
+    function saveToLeaderboard(score) {
+        let lb = JSON.parse(localStorage.getItem('catLeaderboard') || '[]');
+        lb.push({score, date: new Date().toLocaleDateString()});
+        lb.sort((a,b) => b.score - a.score);
+        localStorage.setItem('catLeaderboard', JSON.stringify(lb.slice(0, 5)));
+    }
 
-startLevel();
-update();
+    function updateLeaderboard() {
+        const lb = JSON.parse(localStorage.getItem('catLeaderboard') || '[]');
+        const container = document.getElementById('leaderboard');
+        container.innerHTML = '<b>Top Scores</b>' + lb.map(i => `<div class="lb-row"><span>${i.date}</span><span>${i.score}</span></div>`).join('');
+    }
+
+    // Input Handling
+    window.addEventListener('keydown', e => { 
+        keys[e.code] = true; 
+        if(e.code === 'Escape') togglePause();
+    });
+    window.addEventListener('keyup', e => keys[e.code] = false);
+    
+    // Mobile Touch
+    window.addEventListener('touchstart', e => {
+        const touchX = e.touches[0].clientX;
+        if (touchX < window.innerWidth / 2) keys['ArrowLeft'] = true;
+        else keys['ArrowRight'] = true;
+    });
+    window.addEventListener('touchend', () => {
+        keys['ArrowLeft'] = false;
+        keys['ArrowRight'] = false;
+    });
+
+    function togglePause() {
+        state.paused = !state.paused;
+        document.getElementById('pause-screen').classList.toggle('hidden', !state.paused);
+    }
+
+    muteBtn.onclick = () => {
+        state.muted = !state.muted;
+        muteBtn.textContent = state.muted ? "🔇" : "🔊";
+    };
+
+    function gameLoop() {
+        if (!state.playing || state.paused) return;
+
+        // 1. Player Rotation
+        if (keys['ArrowLeft']) player.angle -= 0.1;
+        if (keys['ArrowRight']) player.angle += 0.1;
+
+        // 2. Move Player
+        player.x += Math.cos(player.angle) * player.speed;
+        player.y += Math.sin(player.angle) * player.speed;
+
+        // Screen Wrap / Bounds
+        if (player.x < 0) player.x = 590;
+        if (player.x > 600) player.x = 10;
+        if (player.y < 0) player.y = 390;
+        if (player.y > 400) player.y = 10;
+
+        player.headEl.style.left = player.x + 'px';
+        player.headEl.style.top = player.y + 'px';
+        player.headEl.style.transform = `rotate(${player.angle}rad)`;
+
+        // 3. Trailing segments
+        player.history.unshift({x: player.x, y: player.y});
+        if (player.history.length > 500) player.history.pop();
+
+        player.segments.forEach((seg, i) => {
+            const index = (i + 1) * 8;
+            const pos = player.history[index] || player.history[player.history.length-1];
+            seg.style.left = pos.x + 'px';
+            seg.style.top = pos.y + 'px';
+        });
+
+        // 4. Smarter AI (Flanking/Avoidance)
+        const dx = ai.x - player.x;
+        const dy = ai.y - player.y;
+        const dist = Math.hypot(dx, dy);
+        
+        // AI flees if player is close, else wanders
+        if (dist < 150) {
+            const moveSpeed = ai.speed * (1 + (150 - dist) / 50); // Faster as you get closer
+            ai.x += (dx / dist) * moveSpeed;
+            ai.y += (dy / dist) * moveSpeed;
+        } else {
+            ai.x += (Math.random() - 0.5) * 2;
+            ai.y += (Math.random() - 0.5) * 2;
+        }
+
+        // AI bounds
+        ai.x = Math.max(10, Math.min(580, ai.x));
+        ai.y = Math.max(10, Math.min(380, ai.y));
+        ai.el.style.left = ai.x + 'px';
+        ai.el.style.top = ai.y + 'px';
+
+        // 5. Collisions
+        leaves.forEach((leaf, i) => {
+            if (Math.hypot(player.x - leaf.x, player.y - leaf.y) < 25) {
+                playSound(600 + (state.score * 10), 'sine', 0.1);
+                leaf.el.remove();
+                leaves.splice(i, 1);
+                addSegment();
+                state.score += 10;
+                scoreVal.textContent = state.score;
+                spawnLeaf();
+                // Difficulty Scaling
+                player.speed += 0.05;
+                ai.speed += 0.08;
+            }
+        });
+
+        // AI Collision (Bonus)
+        if (dist < 25) {
+            playSound(800, 'square', 0.2);
+            state.score += 50;
+            scoreVal.textContent = state.score;
+            ai.x = Math.random() * 500;
+            ai.y = Math.random() * 300;
+            for(let i=0; i<3; i++) addSegment();
+        }
+
+        // Self Collision (Game Over)
+        if (player.segments.length > 5) {
+            for (let i = 15; i < player.segments.length; i++) {
+                const segPos = player.history[(i + 1) * 8];
+                if (segPos && Math.hypot(player.x - segPos.x, player.y - segPos.y) < 10) {
+                    gameOver();
+                }
+            }
+        }
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function addSegment() {
+        const seg = document.createElement('div');
+        seg.className = 'segment';
+        world.appendChild(seg);
+        player.segments.push(seg);
+    }
+
+    highVal.textContent = state.highScore;
+    updateLeaderboard();
 </script>
-
 </body>
 </html>
